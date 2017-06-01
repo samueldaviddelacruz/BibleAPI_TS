@@ -2,11 +2,17 @@
  * Created by samuel on 5/29/17.
  */
 declare var module;
+
+let bibleBooks = require('../bibleBooks.json');
+let bibleVerses = require( '../bibleVerses.json');
+
 import * as express from 'express';
 import * as RemoteRequest from '../Utils/RemoteRequest';
 const booksurl = 'https://bibles.org/v2/versions/spa-RVR1960/books.js?include_chapters=true';
-let booksCache = [];
-let versesCache = {};
+let booksCache:any = bibleBooks;
+
+let versesCache:any = bibleVerses;
+
 let router = express.Router();
 
 /* GET users listing. */
@@ -15,17 +21,6 @@ router.get('/', (req, res, next) => {
     res.send(["hi"]);
 
 });
-//let ApiRequestHandler:any;
-
-
-//ApiRequestHandler.onGetApiBooks =
-
-
-//ApiRequestHandler.onGetApiVerses = ;
-
-
-//ApiRequestHandler.onGetApiSingleVerse = ;
-
 
 
 let sendResponse = (nodeResponse, content) =>{
@@ -39,7 +34,6 @@ let getBooks = async () => {
         console.log('Cache Hit');
         books = booksCache;
         return books;
-       // sendResponse(nodeResponse, books);
     }
     let returnedData = await RemoteRequest.createRequest(booksurl);
     books = returnedData.response.books.map((book) => {
@@ -52,26 +46,23 @@ let getBooks = async () => {
         };
         return mappedBook;
     });
-
-
     booksCache = books;
-
     return books;
-
 };
 
 router.get("/books",async(nodeRequest, nodeResponse) => {
-
-
     let books = await getBooks();
-
-
     sendResponse(nodeResponse, books);
 });
+
+
+
 
 router.get("/verses/:chapterId", async(nodeRequest, nodeResponse) => {
     let chapterId = nodeRequest.params.chapterId;
     let versesurl = `https://bibles.org/v2/chapters/${chapterId}/verses.js`;
+
+
     let verses = await getVerses(versesurl,chapterId);
     sendResponse(nodeResponse, verses);
 });
@@ -106,9 +97,9 @@ let getVerses = async (versesurl,chapterId) =>{
 
 router.get("/getSingleVerse/:chapterId/:verseId/", async(nodeRequest, nodeResponse) => {
 
-    let chapterId = nodeRequest.params.chapterId;
-    let verseId = nodeRequest.params.verseId;
-    var versesurl = `https://bibles.org/v2/verses/${verseId}.js`;
+    const chapterId = nodeRequest.params.chapterId;
+    const verseId = nodeRequest.params.verseId;
+    const versesurl = `https://bibles.org/v2/verses/${verseId}.js`;
     let verse;
 
     if(versesCache[chapterId]){
@@ -123,9 +114,6 @@ router.get("/getSingleVerse/:chapterId/:verseId/", async(nodeRequest, nodeRespon
     verse = verses.filter((verse)=>{
         return verse.id = verseId;
     })[0];
-
-
-
 
     sendResponse(nodeResponse, verse);
 

@@ -8,20 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+let bibleBooks = require('../bibleBooks.json');
+let bibleVerses = require('../bibleVerses.json');
 const express = require("express");
 const RemoteRequest = require("../Utils/RemoteRequest");
 const booksurl = 'https://bibles.org/v2/versions/spa-RVR1960/books.js?include_chapters=true';
-let booksCache = [];
-let versesCache = {};
+let booksCache = bibleBooks;
+let versesCache = bibleVerses;
 let router = express.Router();
 /* GET users listing. */
 router.get('/', (req, res, next) => {
     res.send(["hi"]);
 });
-//let ApiRequestHandler:any;
-//ApiRequestHandler.onGetApiBooks =
-//ApiRequestHandler.onGetApiVerses = ;
-//ApiRequestHandler.onGetApiSingleVerse = ;
 let sendResponse = (nodeResponse, content) => {
     nodeResponse.set("Content-Type", "application/json");
     nodeResponse.send(content);
@@ -32,7 +30,6 @@ let getBooks = () => __awaiter(this, void 0, void 0, function* () {
         console.log('Cache Hit');
         books = booksCache;
         return books;
-        // sendResponse(nodeResponse, books);
     }
     let returnedData = yield RemoteRequest.createRequest(booksurl);
     books = returnedData.response.books.map((book) => {
@@ -80,9 +77,9 @@ let getVerses = (versesurl, chapterId) => __awaiter(this, void 0, void 0, functi
     return verses;
 });
 router.get("/getSingleVerse/:chapterId/:verseId/", (nodeRequest, nodeResponse) => __awaiter(this, void 0, void 0, function* () {
-    let chapterId = nodeRequest.params.chapterId;
-    let verseId = nodeRequest.params.verseId;
-    var versesurl = `https://bibles.org/v2/verses/${verseId}.js`;
+    const chapterId = nodeRequest.params.chapterId;
+    const verseId = nodeRequest.params.verseId;
+    const versesurl = `https://bibles.org/v2/verses/${verseId}.js`;
     let verse;
     if (versesCache[chapterId]) {
         verse = versesCache[chapterId].filter((verse) => {
